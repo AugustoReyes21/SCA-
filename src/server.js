@@ -9,6 +9,7 @@ const publicDir = normalize(join(__dirname, "..", "public"));
 const preferredPort = Number.parseInt(process.env.PORT || "3000", 10);
 const host = process.env.HOST || "0.0.0.0";
 const app = express();
+let activeServer;
 
 app.use(express.json({ limit: "1mb" }));
 
@@ -69,13 +70,14 @@ app.use((error, _request, response, _next) => {
 });
 
 listenWithFallback(preferredPort);
+setupGracefulShutdown();
 
 function listenWithFallback(port) {
-  const server = app.listen(port, host, () => {
+  activeServer = app.listen(port, host, () => {
     console.log(`SCA Dashboard disponible en http://${host}:${port}`);
   });
 
-  server.once("error", (error) => {
+  activeServer.once("error", (error) => {
     if (error.code === "EADDRINUSE" && port < preferredPort + 20) {
       listenWithFallback(port + 1);
       return;
@@ -83,4 +85,21 @@ function listenWithFallback(port) {
 
     throw error;
   });
+}
+
+function setupGracefulShutdown() {
+  const shutdown = (signal) => {
+    console.log(`Recibido ${signal}. Cerrando servidor...`);
+
+    if (!activeServer) {
+      process.exit(0);
+    }
+
+    activeServer.close(() => {
+      process.exit(0);
+    });
+  };
+
+  process.once("SIGINT", shutdown);
+  process.once("SIGTERM", shutdown);
 }

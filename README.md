@@ -15,7 +15,7 @@ npm install
 Opcional, para usar Snyk como proveedor real:
 
 ```bash
-export SNYK_TOKEN=tu_token_de_snyk
+export SNYK_TOKEN=token_Snyk
 ```
 
 ```bash

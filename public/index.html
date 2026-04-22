@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SCA Sentinel | Node.js</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Inicio SCA Sentinel">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" role="img">
+              <path d="M20 4 33 9v10c0 8-5.4 13.6-13 17-7.6-3.4-13-9-13-17V9l13-5Z"></path>
+              <path d="M14 20h12M20 14v12"></path>
+            </svg>
+          </span>
+          <span>
+            <span class="eyebrow">J.A.R.S software</span>
+            <strong>SCA</strong>
+          </span>
+        </a>
+
+        <div class="top-actions">
+          <button class="tool-button" id="loadDemoButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 5h14v14H5z"></path>
+              <path d="M8 9h8M8 13h5"></path>
+            </svg>
+            <span>Cargar demo</span>
+          </button>
+          <label class="tool-button" for="fileInput">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 4v10"></path>
+              <path d="m8 8 4-4 4 4"></path>
+              <path d="M5 15v4h14v-4"></path>
+            </svg>
+            <span>Subir package.json</span>
+          </label>
+          <input id="fileInput" type="file" accept="application/json,.json">
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="intro-band" aria-labelledby="appTitle">
+          <div class="intro-copy">
+            <p class="eyebrow">J.A.R.S Software Composition Analysis</p>
+            <h1 id="appTitle">Audita dependencias de terceros antes de que lleguen a produccion.</h1>
+            <p>
+            
+            </p>
+          </div>
+          <div class="process-strip" aria-label="Flujo del analisis SCA">
+            <div>
+              <span>01</span>
+              <strong>Inventario</strong>
+              <p>Lee dependencias directas del package.json.</p>
+            </div>
+            <div>
+              <span>02</span>
+              <strong>Correlacion</strong>
+              <p>Compara versiones contra una base de riesgos.</p>
+            </div>
+            <div>
+              <span>03</span>
+              <strong>Decision</strong>
+              <p>Ordena acciones por impacto y severidad.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="scanner-layout" aria-label="Herramienta de analisis">
+          <div class="editor-panel">
+            <div class="section-heading">
+              <p class="eyebrow">Entrada</p>
+              <h2>Proyecto Node.js</h2>
+            </div>
+            <div class="provider-control">
+              <label for="providerSelect">Proveedor SCA</label>
+              <select id="providerSelect">
+                <option value="auto">Automatico</option>
+                <option value="snyk">Snyk CLI</option>
+                <option value="demo">Demo local</option>
+              </select>
+              <span id="providerBadge">Detectando proveedor</span>
+            </div>
+            <textarea id="packageInput" spellcheck="false" aria-label="Contenido de package.json"></textarea>
+            <div class="editor-actions">
+              <button class="primary-button" id="scanButton" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M11 19a8 8 0 1 1 5.7-2.4L21 21"></path>
+                  <path d="M8 11.5 10.3 14 15.5 8"></path>
+                </svg>
+                <span>Analizar composicion</span>
+              </button>
+              <button class="ghost-button" id="clearButton" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 7h16"></path>
+                  <path d="M10 11v6M14 11v6"></path>
+                  <path d="m6 7 1 13h10l1-13"></path>
+                  <path d="M9 7V4h6v3"></path>
+                </svg>
+                <span>Limpiar</span>
+              </button>
+              <button class="ghost-button" id="downloadButton" type="button" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 4v10"></path>
+                  <path d="m8 10 4 4 4-4"></path>
+                  <path d="M5 20h14"></path>
+                </svg>
+                <span>Reporte JSON</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="results-panel" aria-live="polite">
+            <div class="section-heading">
+              <p class="eyebrow">Resultado</p>
+              <h2 id="projectName">Esperando analisis</h2>
+            </div>
+            <div class="summary-grid">
+              <article class="metric-card">
+                <span class="metric-label">Dependencias</span>
+                <strong id="dependencyCount">0</strong>
+              </article>
+              <article class="metric-card danger">
+                <span class="metric-label">Vulnerabilidades</span>
+                <strong id="vulnerabilityCount">0</strong>
+              </article>
+              <article class="metric-card warning">
+                <span class="metric-label">Licencias</span>
+                <strong id="licenseCount">0</strong>
+              </article>
+            </div>
+
+            <div class="score-area">
+              <div class="score-ring" id="scoreRing" style="--score-deg: 0deg">
+                <span id="scoreValue">--</span>
+                <small>score</small>
+              </div>
+              <div>
+                <span class="status-pill" id="riskLevel">Sin datos</span>
+                <span class="status-pill provider-pill" id="reportProvider">Sin proveedor</span>
+                <p id="scoreText">
+                  Ejecuta un analisis para ver el nivel de exposicion del proyecto.
+                </p>
+              </div>
+            </div>
+
+            <div class="severity-row" id="severityRow" aria-label="Resumen por severidad"></div>
+          </div>
+        </section>
+
+        <section class="graph-band" aria-labelledby="graphTitle">
+          <div>
+            <p class="eyebrow">Visualizacion</p>
+            <h2 id="graphTitle">Mapa de composicion del software</h2>
+          </div>
+          <canvas id="dependencyGraph" aria-label="Grafo visual de dependencias"></canvas>
+        </section>
+
+        <section class="details-grid" aria-label="Detalles del analisis">
+          <article class="detail-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Riesgos</p>
+              <h2>Vulnerabilidades detectadas</h2>
+            </div>
+            <div class="stack-list" id="vulnerabilityList"></div>
+          </article>
+
+          <article class="detail-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Accion</p>
+              <h2>Plan de remediacion</h2>
+            </div>
+            <div class="stack-list" id="remediationList"></div>
+          </article>
+
+          <article class="detail-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">Gobernanza</p>
+              <h2>Licencias y mantenimiento</h2>
+            </div>
+            <div class="stack-list" id="licenseList"></div>
+          </article>
+
+          <article class="detail-panel">
+            <div class="section-heading compact">
+              <p class="eyebrow">SBOM</p>
+              <h2>Inventario de componentes</h2>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Paquete</th>
+                    <th>Version</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="sbomTable"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

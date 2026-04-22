@@ -1,0 +1,18 @@
+{
+  "name": "sca-dashboard-node",
+  "version": "1.0.0",
+  "description": "Demo educativa de Software Composition Analysis hecha con Node.js.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "snyk": "^1.1304.0"
+  }
+}
